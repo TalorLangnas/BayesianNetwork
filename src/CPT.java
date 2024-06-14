@@ -4,35 +4,71 @@ import java.util.List;
 import java.util.Map;
 
 public class CPT {
-    private Map<String, List<String>> variablesAndOutcomes;
+//    private Map<String, List<String>> variablesAndOutcomes;
+    private List<String> variables;
+    private List<List<String>> outcomes;
     private Map<List<String>, Double> cpt;
     private List<Double> probabilities;
 
-    @Override
-    public String toString() {
-        return "CPT{" +
-                "variablesAndOutcomes=" + variablesAndOutcomes + "\n" +
-                ", cpt=" + cpt +
-                '}';
-    }
-
+//     // ====== original =========
+//    public CPT() {
+//        this.variablesAndOutcomes = new HashMap<>();
+//        this.cpt = new HashMap<>();
+//        this.probabilities = new ArrayList<>();
+//    }
+//     // ====== end original =========
     public CPT() {
-        this.variablesAndOutcomes = new HashMap<>();
+        this.variables = new ArrayList<>();
+        this.outcomes = new ArrayList<>();
         this.cpt = new HashMap<>();
         this.probabilities = new ArrayList<>();
     }
 
+//    @Override
+//    public String toString() {
+//        return "CPT{" +
+//                "variablesAndOutcomes=" + variablesAndOutcomes + "\n" +
+//                ", cpt=" + cpt +
+//                '}';
+//    }
+    @Override
+    public String toString() {
+        String str = "CPT {\n";
+        for(int i = 0; i < variables.size(); i++) {
+            str += "[" + variables.get(i) + "]" + "[" + outcomes.get(i) + "]\n";
+        }
+        str += "cpt=" + cpt + "\n";
+        return str;
+    }
+
     public void addVariablesAndOutcomes(String nodeName, List<String> outcomes) {
-        this.variablesAndOutcomes.put(nodeName, outcomes);
+//        this.variablesAndOutcomes.put(nodeName, outcomes); // original
+        this.variables.add(nodeName);
+        this.outcomes.add(outcomes);
     }
 
-    public Map<String, List<String>> getVariablesAndOutcomes() {
-        return variablesAndOutcomes;
+    public List<String> getVariables() {
+        return variables;
     }
 
-    public void setVariablesAndOutcomes(Map<String, List<String>> variablesAndOutcomes) {
-        this.variablesAndOutcomes = variablesAndOutcomes;
+    public void setVariables(List<String> variables) {
+        this.variables = variables;
     }
+
+    public List<List<String>> getOutcomes() {
+        return outcomes;
+    }
+
+    public void setOutcomes(List<List<String>> outcomes) {
+        this.outcomes = outcomes;
+    }
+//    public Map<String, List<String>> getVariablesAndOutcomes() {
+//        return variablesAndOutcomes;
+//    }
+//
+//    public void setVariablesAndOutcomes(Map<String, List<String>> variablesAndOutcomes) {
+//        this.variablesAndOutcomes = variablesAndOutcomes;
+//    }
 
     public List<Double> getProbabilities() {
         return probabilities;
@@ -78,14 +114,15 @@ public class CPT {
 
     private Map<List<String>, Double> generateCpt() {
         Map<List<String>, Double> cpt = new HashMap<>();
-        List<List<String>> outcomesList = new ArrayList<>();
-        // iterate over variablesAndOutcomes Map and append the outcomes to the variablesOutcomes list
-        for (Map.Entry<String, List<String>> entry : this.variablesAndOutcomes.entrySet()) {
-            String varName = entry.getKey(); // debug
-            outcomesList.add(entry.getValue());
-        }
+//        List<List<String>> outcomesList = new ArrayList<>();
+//        // iterate over variablesAndOutcomes Map and append the outcomes to the variablesOutcomes list
+//        for (Map.Entry<String, List<String>> entry : this.variablesAndOutcomes.entrySet()) {
+//            String varName = entry.getKey(); // debug
+//            outcomesList.add(entry.getValue());
+//        }
         // then create the sample space with SampleSpaceGenerator
-        List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(outcomesList);
+//        List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(outcomesList);
+        List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(this.outcomes);
         // create a new Factor object with the sample space and the probabilities
         for (int i = 0; i < this.probabilities.size(); i++) {
 //            List<String> key = new ArrayList<>();
@@ -100,8 +137,8 @@ public class CPT {
     }
 
     public Factor toFactor() {
-        List<String> variables = new ArrayList<>(variablesAndOutcomes.keySet());
-        Map<List<String>, Double> table = new HashMap<>(cpt);
-        return new Factor(variables, table);
+//        List<String> variables = new ArrayList<>(variablesAndOutcomes.keySet());
+        Map<List<String>, Double> table = new HashMap<>(this.cpt);
+        return new Factor(this.variables, table);
     }
 }

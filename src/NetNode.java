@@ -31,6 +31,10 @@ public class NetNode {
         }
     }
 
+    public boolean isLeaf() {
+        return children.isEmpty();
+    }
+
     public boolean isFromParent() {
         return fromParent;
     }

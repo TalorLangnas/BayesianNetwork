@@ -75,10 +75,9 @@ public class Factor implements Comparable<Factor> {
             for (Map.Entry<List<String>, Double> entry2 : other.cpt.entrySet()) {
                 if (consistent(entry1.getKey(), entry2.getKey(), variable, other)) {
                     List<String> newAssignment = mergeAssignments(entry1.getKey(), entry2.getKey(), newVariables, other);
-                    double newProb = entry1.getValue() * entry2.getValue();
-                    newProb = roundFiveDigits(newProb);
-//                    newProb = Math.floor(newProb * 100000.0) / 100000.0;
-                    newCpt.put(newAssignment, newProb);
+//                    double newProb = entry1.getValue() * entry2.getValue();
+//                    newCpt.put(newAssignment, newProb);
+                    newCpt.put(newAssignment, entry1.getValue() * entry2.getValue());
                     // Increment multiplication counter using AtomicInteger
                     mulCounter.incrementAndGet();
                 }
@@ -123,11 +122,20 @@ public class Factor implements Comparable<Factor> {
         for (Map.Entry<List<String>, Double> entry1 : this.cpt.entrySet()) {
             List<String> reducedAssignment = new ArrayList<>(entry1.getKey());
             reducedAssignment.remove(indexToEliminate);
-            newCpt.put(reducedAssignment, roundFiveDigits(newCpt.getOrDefault(reducedAssignment, 0.0) + entry1.getValue()));
-            // Increment sum counter for each sum operation
-            sumCounter.incrementAndGet();
+            /*
+            Increment sum counter for each sum operation:
+            If newCpt.get(reducedAssignment) returns null, it means that the 'reducedAssignment' key
+            does not exist in the map. In this case, we assign 0.0 to the value of the key "reducedAssignment"
+            and there is no need to increment the sumCounter.
+            If newCpt.get(reducedAssignment) is not null, it means that the 'reducedAssignment' key
+            exists in the map. In this case, we assign the value newCpt.get(reducedAssignment) + entry1.getValue()
+            to the key "reducedAssignment", and then we have to increment the sumCounter.
+             */
+            if(newCpt.get(reducedAssignment) != null){
+                sumCounter.incrementAndGet();
+            }
+            newCpt.put(reducedAssignment, newCpt.getOrDefault(reducedAssignment, 0.0) + entry1.getValue());
         }
-
         // Update the factor with the new variables and CPT
         this.variables = newVariables;
         this.cpt = newCpt;
@@ -136,16 +144,15 @@ public class Factor implements Comparable<Factor> {
     public void normalize(AtomicInteger sumCounter) {
         double sum = 0.0;
         for (double value : this.cpt.values()) {
-//            sum += (value);
-            sum = roundFiveDigits(sum + value);
-            sumCounter.incrementAndGet();
+            if(sum != 0){
+                sumCounter.incrementAndGet();
+            }
+            sum += (value);
         }
-
         for (Map.Entry<List<String>, Double> entry : this.cpt.entrySet()) {
-            entry.setValue(roundFiveDigits(entry.getValue() / sum));
+            entry.setValue(entry.getValue() / sum);
         }
     }
-
 
     public void removeEvidenceVariable(String variable, String assignment) {
         int variableIndex = variables.indexOf(variable);
@@ -186,8 +193,36 @@ public class Factor implements Comparable<Factor> {
             variables.remove(variableIndex);
     }
 
-    public double roundFiveDigits(double x){
-        return Math.floor(x * 100000.0) / 100000.0;
+    public double checkIfExistResultFactor(Map<String, String> var) {
+        // Check if the provided map contains all the variables
+        for (String varName : var.keySet()) {
+            if (!variables.contains(varName)) {
+                return -1.0; // Variable not found in the factor
+            }
+        }
+
+        // Iterate through the entries in the CPT
+        for (Map.Entry<List<String>, Double> entry : cpt.entrySet()) {
+            List<String> key = entry.getKey();
+            boolean match = true;
+
+            // Check if the current key matches the provided variable assignments
+            for (int i = 0; i < variables.size(); i++) {
+                String variable = variables.get(i);
+                if (var.containsKey(variable) && !var.get(variable).equals(key.get(i))) {
+                    match = false;
+                    break;
+                }
+            }
+
+            // If all variable assignments match, return the corresponding probability
+            if (match) {
+                return entry.getValue();
+            }
+        }
+
+        // No matching entry found
+        return -1.0;
     }
 
 }

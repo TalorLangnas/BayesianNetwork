@@ -47,6 +47,8 @@ public class Main {
                 // Perform Variable Elimination
                 String result = variableElimination.eliminate(queryVariable + "=" + queryValue, evidence, eliminationOrder);
                 bw.write(result);
+                // Zero the counters for the next query
+                variableElimination.zeroCounters();
                 // Bayes Ball query
             } else if(line.contains("-")){
                 // Split the Line into Parts:
@@ -62,9 +64,7 @@ public class Main {
                     String[] evidenceParts = parts[1].split(",");
                     for (String ev : evidenceParts) {
                         String[] evParts = ev.split("=");
-//                        if (evParts.length == 2) {
-                            evidence.put(evParts[0], evParts[1]);
-//                        }
+                        evidence.put(evParts[0], evParts[1]);
                     }
                 }
                 // Perform the Bayes Ball Algorithm

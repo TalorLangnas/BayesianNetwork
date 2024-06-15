@@ -193,36 +193,34 @@ public class Factor implements Comparable<Factor> {
             variables.remove(variableIndex);
     }
 
-    public double checkIfExistResultFactor(Map<String, String> var) {
-        // Check if the provided map contains all the variables
-        for (String varName : var.keySet()) {
-            if (!variables.contains(varName)) {
-                return -1.0; // Variable not found in the factor
+    public boolean checkIfExistResultFactor(String queryVariable, Map<String, String> evidenceVars, List<String> hiddenVars, AtomicInteger sumCounter) {
+        // Check if the Factor contains the query variable
+        if (!variables.contains(queryVariable)) {
+            return false;
+        }
+        // Check if the Factor contains the evidence variables
+        for (String evidenceVar : evidenceVars.keySet()) {
+            if (!variables.contains(evidenceVar)) {
+                return false;
             }
         }
-
-        // Iterate through the entries in the CPT
-        for (Map.Entry<List<String>, Double> entry : cpt.entrySet()) {
-            List<String> key = entry.getKey();
-            boolean match = true;
-
-            // Check if the current key matches the provided variable assignments
-            for (int i = 0; i < variables.size(); i++) {
-                String variable = variables.get(i);
-                if (var.containsKey(variable) && !var.get(variable).equals(key.get(i))) {
-                    match = false;
-                    break;
-                }
-            }
-
-            // If all variable assignments match, return the corresponding probability
-            if (match) {
-                return entry.getValue();
+        // Check if the Factor contains the hidden variables
+        for (String hiddenVar : hiddenVars) {
+            if (!variables.contains(hiddenVar)) {
+                return false;
             }
         }
+        // Restrict evidence variables
+        for(Map.Entry<String, String> entry : evidenceVars.entrySet()) {
+            this.removeEvidenceVariable(entry.getKey(), entry.getValue());
+        }
+        // Eliminate hidden variables
+        for (String hiddenVar : hiddenVars) {
+            this.eliminate(hiddenVar, sumCounter);
+        }
+        this.normalize(sumCounter);
 
-        // No matching entry found
-        return -1.0;
+        return true;
     }
 
 }

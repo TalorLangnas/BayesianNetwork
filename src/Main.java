@@ -45,7 +45,8 @@ public class Main {
                 // Extract the Elimination Order
                 List<String> eliminationOrder = Arrays.asList(parts[1].split("-"));
                 // Perform Variable Elimination
-                String result = variableElimination.eliminate(queryVariable + "=" + queryValue, evidence, eliminationOrder);
+//                String result = variableElimination.eliminate(queryVariable + "=" + queryValue, evidence, eliminationOrder);
+                String result = variableElimination.eliminate(queryVariable, queryValue, evidence, eliminationOrder);
                 bw.write(result);
                 // Zero the counters for the next query
                 variableElimination.zeroCounters();

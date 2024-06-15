@@ -38,12 +38,12 @@ public class BayesBall {
             }
             // maybe here is the place to enter the case that source node is leaf node
             // If the source node is a leaf node, then we go to his parent
-            if(curr.isLeaf()) {
-                for (NetNode parent : curr.getParents()) {
-                    parent.setFromChild();
-                    queue.add(parent.getName());
-                }
-            }
+//            if(curr.isLeaf()) {
+//                for (NetNode parent : curr.getParents()) {
+//                    parent.setFromChild();
+//                    queue.add(parent.getName());
+//                }
+//            }
 
             // If the ball is received from a parent and the node does not have evidence, the ball is
             // passed to all children of this node.

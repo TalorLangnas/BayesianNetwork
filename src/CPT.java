@@ -125,12 +125,8 @@ public class CPT {
         List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(this.outcomes);
         // create a new Factor object with the sample space and the probabilities
         for (int i = 0; i < this.probabilities.size(); i++) {
-//            List<String> key = new ArrayList<>();
             String outcomes = sampleSpace.get(i);
             List<String> outcomesToList = List.of(outcomes.split(" "));
-//            key.add(sampleSpace.get(i));
-//            key.add(outcomesToList);
-//            cpt.put(key, this.probabilities.get(i));
             cpt.put(outcomesToList, this.probabilities.get(i));
         }
         return cpt;

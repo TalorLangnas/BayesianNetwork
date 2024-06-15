@@ -37,26 +37,27 @@ public class VariableElimination {
         }
         return new Factor();
     }
-    // Create function that checks if exist factor that contains the query result,
-    // if yes calculate it and return the result as a formatted string
-    String checkIfExistResultFactor(String queryVariable, String queryValue, Map<String, String> evidence, List<Factor> factors){
-        Map<String, String> variables = new HashMap<>(evidence);
-        variables.put(queryVariable, queryValue);
+    // Check if there is a factor that contains the query result
+    private String checkIfExistResultFactor(List<Factor> factors, String queryValue, String queryVariable, Map<String, String> evidenceVars, List<String> hiddenVars){
         for(Factor factor : factors){
-            double res = factor.checkIfExistResultFactor(variables);
-            if(res >= 0){
-                return String.format("%.5f", res) + "," + this.sumCounter + "," + this.mulCounter;
+            boolean containsResult = factor.checkIfExistResultFactor(queryVariable, evidenceVars, hiddenVars, this.sumCounter);
+//            if(factor.checkIfExistResultFactor(queryVariable, evidenceVars, hiddenVars, this.sumCounter)){
+            if(containsResult){
+                double prob = factor.getCpt().get(Collections.singletonList(queryValue));
+//                String ans = String.format("%.5f", prob) + "," + this.sumCounter + "," + this.mulCounter;
+                return String.format("%.5f", prob) + "," + this.sumCounter + "," + this.mulCounter;
             }
         }
         return null;
     }
-    public String eliminate(String query, Map<String, String> evidence, List<String> eliminationOrder) {
+//    public String eliminate(String query, Map<String, String> evidence, List<String> eliminationOrder) {
+    public String eliminate(String queryVariable, String queryValue, Map<String, String> evidence, List<String> eliminationOrder) {
         // Implement the Variable Elimination Algorithm
         // queryVariable = "Q=q"
         //1.  Parse the query
-        String[] queryParts = query.split("=");
-        String queryVariable = queryParts[0];
-        String queryValue = queryParts[1];
+//        String[] queryParts = query.split("=");
+//        String queryVariable = queryParts[0];
+//        String queryValue = queryParts[1];
         // 2. get the relevant nodes for the query
         Set<NetNode> relevantNodes = getRelevantNodes(queryVariable, evidence, eliminationOrder);
         // 3. remove the irrelevant nodes from eliminationOrder list
@@ -68,6 +69,7 @@ public class VariableElimination {
                 eliminationOrderCopy.remove(node);
             }
         }
+
         eliminationOrder = eliminationOrderCopy;
         // 4. Create a list of factors for each node in the network
         List<Factor> factors = new ArrayList<>();
@@ -75,10 +77,11 @@ public class VariableElimination {
             factors.add(node.getCPT().toFactor());
         }
         // Checks if exist factor that contains the query result,
-        String checkResult = checkIfExistResultFactor(queryVariable, queryValue, evidence, factors);
-        if(checkResult != null){
-            return checkResult;
-        }
+        // modify the function such that you verify that the function receives all the relevant nodes
+//        String checkResult = checkIfExistResultFactor(factors, queryValue, queryVariable, evidence, eliminationOrder);
+//        if(checkResult != null){
+//            return checkResult;
+//        }
         // 5. Initialize the factors with the relevant entries (with no the evidence variables)
         List<Factor>  factorsToRemove = new ArrayList<>();
         for(Map.Entry<String, String> entry : evidence.entrySet()){
@@ -94,10 +97,7 @@ public class VariableElimination {
         }
         // Remove factors with no variables
         factors.removeAll(factorsToRemove);
-//        System.out.println("> > > > > Factors after reduce: ");
-//        for (Factor factor : factors) {
-//                    System.out.println(factor);
-//                }
+
         // 6. If we have hidden variables Eliminate them by the elimination order
         for(String variable : eliminationOrder){
             // 6.1 create temp list with the relevant factors
@@ -123,6 +123,7 @@ public class VariableElimination {
             factors.add(joinedFactor);
         }
         // 7. Join the remaining factors (it should be only one factors containing the query variable)
+        // add while loope to join the remaining factors
         Factor resultFactor = join(factors, queryVariable, this.mulCounter);
         // 8. Normalize the resulting factor
         resultFactor.normalize(this.sumCounter);
@@ -145,6 +146,7 @@ public class VariableElimination {
         }
         return true;
     }
+    // Function the hidden nodes which are not already in the relevant nodes list
     private List<String> getHidden(Set<NetNode> relevantNodes, List<String> eliminationOrder) {
         List<String> hidden = new ArrayList<>();
         for(String node : eliminationOrder){
@@ -155,18 +157,20 @@ public class VariableElimination {
         return hidden;
     }
     // function that receives String and return all the ancestors of the node
-    private Set<NetNode> getRelevantNodes(String query, Map<String, String> evidence, List<String> eliminationOrder) {
-           Set<NetNode> relevantNodes = new HashSet<>();
+    private Set<NetNode> getRelevantNodes(String queryVariable, Map<String, String> evidence, List<String> eliminationOrder) {
+        BayesBall bayesBall = new BayesBall(network);
+        Set<NetNode> relevantNodes = new HashSet<>();
             // Add the query node and its ancestors
-            String queryVariable = query.split("=")[0];
             relevantNodes.add(network.getNode(queryVariable));
             relevantNodes.addAll(network.getNode(queryVariable).getAncestors());
+            // Check conditional independence between the query node and the evidence nodes
             // Add the evidence nodes and their ancestors
             for (String ev : evidence.keySet()) {
                 relevantNodes.add(network.getNode(ev));
                 relevantNodes.addAll(network.getNode(ev).getAncestors());
             }
             List<String> hidden = getHidden(relevantNodes, eliminationOrder);
+        List<String> nodesToRemove = new ArrayList<>();
             for(String node : hidden){
                 NetNode hiddenNode = network.getNode(node);
                 boolean leaf = hiddenNode.isLeaf();
@@ -175,15 +179,16 @@ public class VariableElimination {
                 if(hiddenNode.isLeaf() &&
                   (!evidence.containsKey(node)) &&
                   (!queryVariable.equals(node))) {
-                    hidden.remove(node);
+                    nodesToRemove.add(node);
+//                    hidden.remove(node);
                 }
             }
-            BayesBall bayesBall = new BayesBall(network);
+            hidden.removeAll(nodesToRemove);
+
 //            for(String target : eliminationOrder){
             for(String target : hidden){
 //                relevantNodes.addAll(bayesBall.getRelevantNodes(queryVariable, target, evidence));
                 boolean result = bayesBall.areIndependent(queryVariable, target, evidence);
-                boolean result2 = bayesBall.areIndependent(target, queryVariable, evidence); // debug
                 if(!result){
                     relevantNodes.add(network.getNode(target));
                 }

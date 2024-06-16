@@ -62,4 +62,11 @@ public class BayesianNetwork {
     public NetNode getNode(String nodeName) {
         return nodes.get(nodeName);
     }
+
+    public void resetFlags() {
+        for (Map.Entry<String, NetNode> entry : nodes.entrySet()) {
+            NetNode node = entry.getValue();
+            node.resetFlags();
+        }
+    }
 }

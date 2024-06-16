@@ -8,8 +8,28 @@ public class BayesBall {
         this.network = network;
     }
 
+    private void addParentsToQueue(NetNode curr, Queue<String> queue){
+        for (NetNode parent : curr.getParents()) {
+            if(!curr.getVisitedParents(curr.getParents().indexOf(parent))) {
+                curr.setVisitedParents(curr.getParents().indexOf(parent));
+                parent.setFromChild();
+                queue.add(parent.getName());
+            }
+        }
+    }
+
+    private void addChildrenToQueue(NetNode curr, Queue<String> queue){
+        for (NetNode child : curr.getChildren()) {
+            if (!curr.getVisitedChildren(curr.getChildren().indexOf(child))){
+                curr.setVisitedChildren(curr.getChildren().indexOf(child));
+                child.setFromParent();
+                queue.add(child.getName());
+            }
+        }
+    }
+
     public boolean areIndependent(String source, String target, Map<String, String> evidence) {
-        Set<String> visited = new HashSet<>();
+//        Set<String> visited = new HashSet<>();
         Queue<String> queue = new LinkedList<>();
 
         // Adding the source node to the queue
@@ -17,63 +37,38 @@ public class BayesBall {
 
         while(! queue.isEmpty()) {
             String currName = queue.poll();
-
-//            if (visited.contains(currName)) {
-//                continue;
-//            }
-            visited.add(currName);
+//            visited.add(currName);
 
             // Check if we reached the target node
             if (currName.equals(target)) {
                 // We reached the target node => the nodes are dependent
+                network.resetFlags(); // Rest the boolean flags
                 return false;
             }
             NetNode curr = network.getNode(currName);
-            // if this is the source node, then we can go to any of its children
+            // if this is the source node, then we can go to any of its children and parents
             if(currName.equals(source)) {
-                for (NetNode child : curr.getChildren()) {
-                    child.setFromParent();
-                    queue.add(child.getName());
-                }
+                addChildrenToQueue(curr, queue);
+                addParentsToQueue(curr, queue);
             }
-            // maybe here is the place to enter the case that source node is leaf node
-            // If the source node is a leaf node, then we go to his parent
-//            if(curr.isLeaf()) {
-//                for (NetNode parent : curr.getParents()) {
-//                    parent.setFromChild();
-//                    queue.add(parent.getName());
-//                }
-//            }
 
             // If the ball is received from a parent and the node does not have evidence, the ball is
             // passed to all children of this node.
 
             // if we arrived to unobserved node from his parent, we can go only to his children
             if(curr.isFromParent() && ! evidence.containsKey(currName)) {
-                for (NetNode child : curr.getChildren()) {
-                    child.setFromParent();
-                    queue.add(child.getName());
-                }
+                addChildrenToQueue(curr, queue);
             }
             // If the ball is received from a child and the node does not have evidence, the ball is
             // bounced back to all the children of the node and passed to all parents of the node.
             if(curr.isFromChild() && ! evidence.containsKey(currName)) {
-                for (NetNode parent : curr.getParents()) {
-                    parent.setFromChild();
-                    queue.add(parent.getName());
-                }
-                for (NetNode child : curr.getChildren()) {
-                    child.setFromParent();
-                    queue.add(child.getName());
-                }
+                addParentsToQueue(curr, queue);
+                addChildrenToQueue(curr, queue);
             }
             // If the ball is received from a parent and the node has evidence, the ball is bounced
             // back to all parents of the node
             if(curr.isFromParent() && evidence.containsKey(currName)) {
-                for (NetNode parent : curr.getParents()) {
-                    parent.setFromChild();
-                    queue.add(parent.getName());
-                }
+                addParentsToQueue(curr, queue);
             }
             // If the ball is received from a child and the node has evidence, the ball is blocked (it
             //is not passed to any node).
@@ -83,8 +78,10 @@ public class BayesBall {
             curr.clearFlags();
         }
         // We did not reach the target node => the nodes are Conditional Independent
+        network.resetFlags(); // Rest the boolean flags
         return true;
     }
+
 
     public void processQueries(String inputFile, String outputFile) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(inputFile));

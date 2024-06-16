@@ -52,15 +52,11 @@ public class VariableElimination {
     }
 //    public String eliminate(String query, Map<String, String> evidence, List<String> eliminationOrder) {
     public String eliminate(String queryVariable, String queryValue, Map<String, String> evidence, List<String> eliminationOrder) {
-        // Implement the Variable Elimination Algorithm
-        // queryVariable = "Q=q"
-        //1.  Parse the query
-//        String[] queryParts = query.split("=");
-//        String queryVariable = queryParts[0];
-//        String queryValue = queryParts[1];
-        // 2. get the relevant nodes for the query
+        // Variable Elimination Algorithm
+
+        // 1. get the relevant nodes for the query
         Set<NetNode> relevantNodes = getRelevantNodes(queryVariable, evidence, eliminationOrder);
-        // 3. remove the irrelevant nodes from eliminationOrder list
+        // 2. remove the irrelevant nodes from eliminationOrder list
         // Casting eliminationOrder to ArrayList to avoid ConcurrentModificationException
         ArrayList<String> eliminationOrderCopy = new ArrayList<>(eliminationOrder);
         for(String node : eliminationOrder){
@@ -71,18 +67,19 @@ public class VariableElimination {
         }
 
         eliminationOrder = eliminationOrderCopy;
-        // 4. Create a list of factors for each node in the network
+        // 3. Create a list of factors for each node in the network
         List<Factor> factors = new ArrayList<>();
         for(NetNode node : relevantNodes){
             factors.add(node.getCPT().toFactor());
         }
         // Checks if exist factor that contains the query result,
         // modify the function such that you verify that the function receives all the relevant nodes
+
 //        String checkResult = checkIfExistResultFactor(factors, queryValue, queryVariable, evidence, eliminationOrder);
 //        if(checkResult != null){
 //            return checkResult;
 //        }
-        // 5. Initialize the factors with the relevant entries (with no the evidence variables)
+        // 4. Initialize the factors with the relevant entries (with no the evidence variables)
         List<Factor>  factorsToRemove = new ArrayList<>();
         for(Map.Entry<String, String> entry : evidence.entrySet()){
             for(Factor factor : factors){
@@ -98,39 +95,39 @@ public class VariableElimination {
         // Remove factors with no variables
         factors.removeAll(factorsToRemove);
 
-        // 6. If we have hidden variables Eliminate them by the elimination order
+        // 5. If we have hidden variables Eliminate them by the elimination order
         for(String variable : eliminationOrder){
-            // 6.1 create temp list with the relevant factors
+            // 5.1 create temp list with the relevant factors
             List<Factor> variableFactors = new ArrayList<>();
             for(Factor factor : factors){
                 if(factor.getVariables().contains(variable)){
                     variableFactors.add(factor);
                 }
             }
-            // 6.1.1 remove factors that contain the variable from the factors list
+            // 5.1.1 remove factors that contain the variable from the factors list
             factors.removeAll(variableFactors);
-            // 6.1.2 check if the factors list contains only one factor with one variable
+            // 5.1.2 check if the factors list contains only one factor with one variable
             if(removeSingleVariableFactors(variableFactors, queryVariable)){
                 continue;
             }
-            // 6.2 sort the list by factors size (if the size is the same sort by ASCII order of the variable name)
+            // 5.2 sort the list by factors size (if the size is the same sort by ASCII order of the variable name)
             Collections.sort(variableFactors);
-            // 6.3 join the factors by order
+            // 5.3 join the factors by order
             Factor joinedFactor = join(variableFactors, variable, this.mulCounter);
-            // 6.4 eliminate the variable
+            // 5.4 eliminate the variable
             joinedFactor.eliminate(variable, this.sumCounter);
-            // 6.5 add the new factor to the factors list
+            // 5.5 add the new factor to the factors list
             factors.add(joinedFactor);
         }
-        // 7. Join the remaining factors (it should be only one factors containing the query variable)
+        // 6. Join the remaining factors (it should be only one factors containing the query variable)
         // add while loope to join the remaining factors
         Factor resultFactor = join(factors, queryVariable, this.mulCounter);
-        // 8. Normalize the resulting factor
+        // 7. Normalize the resulting factor
         resultFactor.normalize(this.sumCounter);
-        // 9. Get the probability of the query variable
+        // 8. Get the probability of the query variable
         // Convert the query value to List<String> and get the value by the key
         double prob = resultFactor.getCpt().get(Collections.singletonList(queryValue));
-        // 10. Return the result
+        // 9. Return the result
         String ans = String.format("%.5f", prob) + "," + this.sumCounter + "," + this.mulCounter;
         System.out.println("Answer: " + ans);
 

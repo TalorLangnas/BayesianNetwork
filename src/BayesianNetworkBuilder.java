@@ -92,11 +92,11 @@ public class BayesianNetworkBuilder {
                     // create Factor function that takes this Probabilities string and creates the CPT
                     // the Factor that applies all this function is data member of the Child node
                 }
-                System.out.println();
+//                System.out.println();
 
             }
-            System.out.println("------------- printing network");
-            network.printNetwork();
+//            System.out.println("------------- printing network");
+//            network.printNetwork();
         } catch (Exception e) {
             e.printStackTrace();
         }

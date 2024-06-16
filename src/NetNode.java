@@ -5,11 +5,14 @@ public class NetNode {
     private List<String> states;
     private List<String> outcomes;
     private List<NetNode> parents;
+    private List<Boolean> visitedParents;
     private List<NetNode> children;
+    private List<Boolean> visitedChildren;
 
     private CPT cpt;
     private boolean fromParent;
     private boolean fromChild;
+
 
     public NetNode(String name) {
         this.name = name;
@@ -17,6 +20,8 @@ public class NetNode {
         this.outcomes = new ArrayList<>();
         this.parents = new ArrayList<>();
         this.children = new ArrayList<>();
+        this.visitedParents = new ArrayList<>();
+        this.visitedChildren = new ArrayList<>();
         this.cpt = new CPT();
         this.fromParent = false;
         this.fromChild = false;
@@ -58,6 +63,50 @@ public class NetNode {
         this.outcomes = outcomes;
     }
 
+    public List<Boolean> getVisitedParentsList() {
+        return visitedParents;
+    }
+    public Boolean getVisitedParents(int index) {
+        return this.visitedParents.get(index);
+    }
+
+    public void setVisitedParents(int index) {
+        if(!this.visitedParents.get(index)){
+            this.visitedParents.set(index, true);
+        }
+    }
+
+    public void zeroVisitedParents() {
+        for (int i = 0; i < visitedParents.size(); i++) {
+            visitedParents.set(i, false);
+        }
+    }
+
+    public List<Boolean> getVisitedChildrenList() {
+        return visitedChildren;
+    }
+    public Boolean getVisitedChildren(int index) {
+        return this.visitedChildren.get(index);
+    }
+
+    public void setVisitedChildren(int index) {
+        if(!this.visitedChildren.get(index)){
+            this.visitedChildren.set(index, true);
+        }
+    }
+
+    public void zeroVisitedChildren() {
+        for (int i = 0; i < visitedChildren.size(); i++) {
+            visitedChildren.set(i, false);
+        }
+    }
+
+    public void resetFlags() {
+        this.zeroVisitedParents();
+        this.zeroVisitedChildren();
+        this.clearFlags();
+    }
+
     public void printNode() {
         System.out.println("Node: " + name);
         System.out.println("Outcomes: " + outcomes);
@@ -97,10 +146,12 @@ public class NetNode {
 
     public void addParent(NetNode parent) {
         parents.add(parent);
+        this.visitedParents.add(false);
     }
 
     public void addChild(NetNode child) {
         children.add(child);
+        this.visitedChildren.add(false);
     }
 
     public void setCPT(CPT cpt) {

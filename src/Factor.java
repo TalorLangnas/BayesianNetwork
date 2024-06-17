@@ -223,6 +223,30 @@ public class Factor implements Comparable<Factor> {
         return true;
     }
 
+    // this functions checks if the factor holds all the data needed to extract the result without any further operations
+    // case 1: the factor contains the query variable and all the evidence variables with no other hidden variables
+    public boolean checkQueryAndEvidence(String queryVariable,Map<String, String> evidenceVars, List<String> hidden){
+        // Check if the Factor contains hidden variables
+        for(String hiddenVar : hidden){
+            if(variables.contains(hiddenVar)){
+                return false;
+            }
+        }
+        // Check if the Factor contains the query variable
+        if (!variables.contains(queryVariable)) {
+            return false;
+        }
+        // Check if the Factor contains the evidence variables
+        for (String evidenceVar : evidenceVars.keySet()) {
+            if (!variables.contains(evidenceVar)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+
 }
 
 

@@ -20,13 +20,13 @@ public class VariableElimination {
         this.mulCounter.set(0);
     }
 
-    public Factor join(List<Factor> factors, String varName, AtomicInteger mulCounter){
+    public Factor join(BayesianNetwork network, List<Factor> factors, String varName, AtomicInteger mulCounter){
         while(factors.size() > 1){
             // Extract the first two factors from the list
             Factor f1 = factors.remove(0);
             Factor f2 = factors.remove(0);
             // Join the two factors on the specified variable
-            Factor joinedFactor = f1.join(f2, varName, mulCounter);
+            Factor joinedFactor = f1.join(network, f2, varName, mulCounter);
             // Add the resulting factor back to the list
             factors.add(0, joinedFactor);
             // Sort the factors list
@@ -171,7 +171,16 @@ public class VariableElimination {
                 eliminationOrderCopy.remove(node);
             }
         }
-
+        // remove evidence variables from eliminationOrder
+        for(String node : eliminationOrder){
+            if(evidence.containsKey(node)){
+                eliminationOrderCopy.remove(node);
+            }
+        }
+        // remove query variable from eliminationOrder
+        if(eliminationOrderCopy.contains(queryVariable)){
+            eliminationOrderCopy.remove(queryVariable);
+        }
         eliminationOrder = eliminationOrderCopy;
         // 3. Create a list of factors for each node in the network
         List<Factor> factors = new ArrayList<>();
@@ -216,9 +225,14 @@ public class VariableElimination {
         factors.removeAll(factorsToRemove);
         // If factor contains irrelevant variable, remove the factor
 //        factorsToRemove.clear();
+
         checkFactorsVariables(factors, eliminationOrder, queryVariable);
         // 5. If we have hidden variables Eliminate them by the elimination order
         for(String variable : eliminationOrder){
+            if(variable.equals(queryVariable)){
+                // Skip the query variable, we don't need to eliminate it
+                continue;
+            }
             // 5.1 create temp list with the relevant factors
             List<Factor> variableFactors = new ArrayList<>();
             for(Factor factor : factors){
@@ -235,7 +249,7 @@ public class VariableElimination {
             // 5.2 sort the list by factors size (if the size is the same sort by ASCII order of the variable name)
             Collections.sort(variableFactors);
             // 5.3 join the factors by order
-            Factor joinedFactor = join(variableFactors, variable, this.mulCounter);
+            Factor joinedFactor = join(this.network, variableFactors, variable, this.mulCounter);
             // 5.4 eliminate the variable
             joinedFactor.eliminate(variable, this.sumCounter);
             // 5.5 add the new factor to the factors list
@@ -243,12 +257,18 @@ public class VariableElimination {
         }
         // 6. Join the remaining factors (it should be only one factors containing the query variable)
         // add while loope to join the remaining factors
-        Factor resultFactor = join(factors, queryVariable, this.mulCounter);
+        Factor resultFactor = join(this.network, factors, queryVariable, this.mulCounter);
         // 7. Normalize the resulting factor
         resultFactor.normalize(this.sumCounter);
         // 8. Get the probability of the query variable
         // Convert the query value to List<String> and get the value by the key
-        double prob = resultFactor.getCpt().get(Collections.singletonList(queryValue));
+        Double prob = resultFactor.getCpt().get(Collections.singletonList(queryValue));
+        if(prob == null){
+            System.out.println("input Query Value: " + queryValue);
+            System.out.println("Query value outcomes: " + network.getNode(queryVariable).getOutcomes());
+            System.out.println("Error: The query value is not found in the resulting factor");
+            prob = 0.000000;
+        }
         // 9. Return the result
         String ans = String.format("%.5f", prob) + "," + this.sumCounter + "," + this.mulCounter;
         System.out.println("Answer: " + ans);

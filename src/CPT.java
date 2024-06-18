@@ -4,19 +4,12 @@ import java.util.List;
 import java.util.Map;
 
 public class CPT {
-//    private Map<String, List<String>> variablesAndOutcomes;
-    private List<String> variables;
-    private List<List<String>> outcomes;
-    private Map<List<String>, Double> cpt;
+        private List<String> variables;
+        private List<List<String>> outcomes;
+        private Map<List<String>, Double> cpt;
     private List<Double> probabilities;
 
-//     // ====== original =========
-//    public CPT() {
-//        this.variablesAndOutcomes = new HashMap<>();
-//        this.cpt = new HashMap<>();
-//        this.probabilities = new ArrayList<>();
-//    }
-//     // ====== end original =========
+
     public CPT() {
         this.variables = new ArrayList<>();
         this.outcomes = new ArrayList<>();
@@ -24,13 +17,6 @@ public class CPT {
         this.probabilities = new ArrayList<>();
     }
 
-//    @Override
-//    public String toString() {
-//        return "CPT{" +
-//                "variablesAndOutcomes=" + variablesAndOutcomes + "\n" +
-//                ", cpt=" + cpt +
-//                '}';
-//    }
     @Override
     public String toString() {
         String str = "CPT {\n";
@@ -114,14 +100,6 @@ public class CPT {
 
     private Map<List<String>, Double> generateCpt() {
         Map<List<String>, Double> cpt = new HashMap<>();
-//        List<List<String>> outcomesList = new ArrayList<>();
-//        // iterate over variablesAndOutcomes Map and append the outcomes to the variablesOutcomes list
-//        for (Map.Entry<String, List<String>> entry : this.variablesAndOutcomes.entrySet()) {
-//            String varName = entry.getKey(); // debug
-//            outcomesList.add(entry.getValue());
-//        }
-        // then create the sample space with SampleSpaceGenerator
-//        List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(outcomesList);
         List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(this.outcomes);
         // create a new Factor object with the sample space and the probabilities
         for (int i = 0; i < this.probabilities.size(); i++) {
@@ -130,6 +108,15 @@ public class CPT {
             cpt.put(outcomesToList, this.probabilities.get(i));
         }
         return cpt;
+    }
+    // function to assign sample space to the CPT considering the variables and outcomes
+    public void generateSampleSpace(){
+        List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(this.outcomes);
+        for (int i = 0; i < sampleSpace.size(); i++){
+            String outcomes = sampleSpace.get(i);
+            List<String> outcomesToList = List.of(outcomes.split(" "));
+            cpt.put(outcomesToList, 0.0);
+        }
     }
 
     public Factor toFactor() {

@@ -1,9 +1,6 @@
 import javax.management.Query;
 import java.io.*;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) throws Exception  {
@@ -43,7 +40,13 @@ public class Main {
                     }
                 }
                 // Extract the Elimination Order
-                List<String> eliminationOrder = Arrays.asList(parts[1].split("-"));
+                List<String> eliminationOrder = new ArrayList<>();
+                if (parts.length > 1) {
+                    eliminationOrder = Arrays.asList(parts[1].split("-"));
+                } else {
+                    // If there is no hidden variables, the elimination order is empty
+                    eliminationOrder.add(0,"");
+                }
                 // Perform Variable Elimination
 //                String result = variableElimination.eliminate(queryVariable + "=" + queryValue, evidence, eliminationOrder);
                 String result = variableElimination.eliminate(queryVariable, queryValue, evidence, eliminationOrder);

@@ -20,6 +20,10 @@ public class BayesianNetwork {
     }
 
 //    public void printNetwork() {
+
+    public Map<String, NetNode> getNodes() {
+        return nodes;
+    }
 //        int i = 1;
 //        for (Map.Entry<String, BbNode> entry : nodes.entrySet()) {
 //            BbNode node = entry.getValue();

@@ -22,13 +22,12 @@ public class BayesianNetworkBuilder {
             // Parse the XML file
             Document document = builder.parse(new File(xmlFilePath));
             // Get the root element of the XML document
-//            document.getDocumentElement().normalize();
             Element root = document.getDocumentElement();
-            System.out.println("Root element: " + root.getNodeName());
+//            System.out.println("Root element: " + root.getNodeName());
             // This part is to build the nodes of the network:
             // Get all the elements with the tag name "VARIABLE"
             NodeList varList = document.getElementsByTagName("VARIABLE");
-            System.out.println("total nodes: " + varList.getLength());
+//            System.out.println("total nodes: " + varList.getLength());
 
             for (int i = 0; i < varList.getLength(); i++) {
                 Node varNode = varList.item(i);
@@ -59,9 +58,6 @@ public class BayesianNetworkBuilder {
                     String childNodeName = defElement.getElementsByTagName("FOR").item(0).getTextContent();
                     NetNode childNode = network.getNode(childNodeName);
                     CPT cpt = new CPT();
-                    // option 1: define private Map<String, List<String>> variablesAndOutcomes of the "FOR" node
-                    // option 2: create function Factor.addVariableAndOutcomes(String nodeName, List<String> outcomes)
-                    // which appends the nodeName and its outcomes to the Factor object VariableAndOutcomes Map
                     // Get the parents of the node
                     NodeList parents = defElement.getElementsByTagName("GIVEN");
                     for (int j = 0; j < parents.getLength(); j++) {
@@ -74,12 +70,8 @@ public class BayesianNetworkBuilder {
                         // add the parent to parents list of child BbNode
                         childNode.addParent(parentNode);
                         // Get the parentNode outcomes list
-                        // option 1: add to the Map key: parentName, value: parentNode outcomes
-                        // option 2: use the function from option 2
                         cpt.addVariablesAndOutcomes(parentName, parentNode.getOutcomes());
                     }
-                    // option 1: add the child to the Map
-                    // option 2: use the function from option 2
                     cpt.addVariablesAndOutcomes(childNodeName, childNode.getOutcomes());
                     // Get the CPT of the node
                     // Reverse the order of the cpt items
@@ -88,17 +80,8 @@ public class BayesianNetworkBuilder {
                     cpt.setProbabilities(probabilitiesContent);
                     cpt.buildCpt();
                     childNode.setCPT(cpt);
-//                    // print CPT
-//                    System.out.println("CPT for node: " + childNodeName);
-//                    System.out.println(cpt.toString());
-                    // create Factor function that takes this Probabilities string and creates the CPT
-                    // the Factor that applies all this function is data member of the Child node
                 }
-//                System.out.println();
-
             }
-//            System.out.println("------------- printing network");
-//            network.printNetwork();
         } catch (Exception e) {
             e.printStackTrace();
         }

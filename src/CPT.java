@@ -28,7 +28,6 @@ public class CPT {
     }
 
     public void addVariablesAndOutcomes(String nodeName, List<String> outcomes) {
-//        this.variablesAndOutcomes.put(nodeName, outcomes); // original
         this.variables.add(nodeName);
         this.outcomes.add(outcomes);
     }
@@ -48,13 +47,6 @@ public class CPT {
     public void setOutcomes(List<List<String>> outcomes) {
         this.outcomes = outcomes;
     }
-//    public Map<String, List<String>> getVariablesAndOutcomes() {
-//        return variablesAndOutcomes;
-//    }
-//
-//    public void setVariablesAndOutcomes(Map<String, List<String>> variablesAndOutcomes) {
-//        this.variablesAndOutcomes = variablesAndOutcomes;
-//    }
 
     public List<Double> getProbabilities() {
         return probabilities;
@@ -120,7 +112,6 @@ public class CPT {
     }
 
     public Factor toFactor() {
-//        List<String> variables = new ArrayList<>(variablesAndOutcomes.keySet());
         Map<List<String>, Double> table = new HashMap<>(this.cpt);
         return new Factor(this.variables, table);
     }

@@ -29,7 +29,6 @@ public class BayesBall {
     }
 
     public boolean areIndependent(String source, String target, Map<String, String> evidence) {
-//        Set<String> visited = new HashSet<>();
         Queue<String> queue = new LinkedList<>();
 
         // Adding the source node to the queue
@@ -80,36 +79,6 @@ public class BayesBall {
         // We did not reach the target node => the nodes are Conditional Independent
         network.resetFlags(); // Rest the boolean flags
         return true;
-    }
-
-
-    public void processQueries(String inputFile, String outputFile) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(inputFile));
-        BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile));
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            String[] parts = line.split("\\|");
-            String[] query = parts[0].split("-");
-            String A = query[0];
-            String B = query[1];
-
-            Map<String, String> evidence = new HashMap<>();
-            if (parts.length > 1) {
-                String[] evidenceParts = parts[1].split(",");
-                for (String ev : evidenceParts) {
-                    String[] evParts = ev.split("=");
-                    evidence.put(evParts[0], evParts[1]);
-                }
-            }
-
-            boolean result = areIndependent(A, B, evidence);
-            bw.write(result ? "yes" : "no");
-            bw.newLine();
-        }
-
-        br.close();
-        bw.close();
     }
 }
 

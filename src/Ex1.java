@@ -1,15 +1,14 @@
-import javax.management.Query;
 import java.io.*;
 import java.util.*;
 
-public class Main {
+public class Ex1 {
     public static void main(String[] args) throws Exception  {
         BufferedReader br = new BufferedReader(new FileReader("input.txt"));
         BufferedWriter bw = new BufferedWriter(new FileWriter("output.txt"));
         String networkXmlFile = br.readLine().trim();
         BayesianNetworkBuilder builder = new BayesianNetworkBuilder();
         BayesianNetwork network = builder.buildNetworkFromXML(networkXmlFile);
-        network.printNetwork();
+//        network.printNetwork();
 
         BayesBall bayesBall = new BayesBall(network);
         VariableElimination variableElimination = new VariableElimination(network);
@@ -48,7 +47,6 @@ public class Main {
                     eliminationOrder.add(0,"");
                 }
                 // Perform Variable Elimination
-//                String result = variableElimination.eliminate(queryVariable + "=" + queryValue, evidence, eliminationOrder);
                 String result = variableElimination.eliminate(queryVariable, queryValue, evidence, eliminationOrder);
                 bw.write(result);
                 // Zero the counters for the next query

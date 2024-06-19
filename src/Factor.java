@@ -1,7 +1,6 @@
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//public class Factor implements FactorPlan{
 public class Factor implements Comparable<Factor> {
     private List<String> variables;
     private Map<List<String>, Double> cpt;
@@ -57,98 +56,6 @@ public class Factor implements Comparable<Factor> {
     }
 
     // Operations:
-
-//    public Factor join(Factor other, String variable, AtomicInteger mulCounter) {
-//        // Create a new list of variables for the resulting factor
-//        List<String> newVariables = new ArrayList<>(this.variables);
-//        for (String var : other.variables) {
-//            if (!newVariables.contains(var)) {
-//                newVariables.add(var);
-//            }
-//        }
-//
-//        // Create a new CPT for the resulting factor
-//        Map<List<String>, Double> newCpt = new HashMap<>();
-//
-//        // Iterate through all possible combinations of variable assignments
-//        for (Map.Entry<List<String>, Double> entry1 : this.cpt.entrySet()) {
-//            for (Map.Entry<List<String>, Double> entry2 : other.cpt.entrySet()) {
-//                if (consistent(entry1.getKey(), entry2.getKey(), variable, other)) {
-//                    List<String> newAssignment = mergeAssignments(entry1.getKey(), entry2.getKey(), newVariables, other);
-////                    double newProb = entry1.getValue() * entry2.getValue();
-////                    newCpt.put(newAssignment, newProb);
-//                    newCpt.put(newAssignment, entry1.getValue() * entry2.getValue());
-//                    // Increment multiplication counter using AtomicInteger
-//                    mulCounter.incrementAndGet();
-//                }
-//            }
-//        }
-//
-//        return new Factor(newVariables, newCpt);
-//    }
-//
-//    public Factor join(BayesianNetwork network, Factor other, String variable, AtomicInteger mulCounter) {
-//        // 1. Create new CPT
-//        CPT newCPT = new CPT();
-//        // 2. add variables  and their outcomes to the new CPT
-//        for(String var : this.variables){
-//            newCPT.addVariablesAndOutcomes(var, network.getNode(var).getOutcomes());
-//        }
-//        for(String var : other.variables){
-//            if(!newCPT.getVariables().contains(var)){
-//                newCPT.addVariablesAndOutcomes(var, network.getNode(var).getOutcomes());
-//            }
-//        }
-//        // 3. generate sampleSpace for the new CPT
-//        newCPT.generateSampleSpace();
-//
-//        int varIndexInNewCpt = newCPT.getVariables().indexOf(variable);
-//        int thisVarIndex = this.variables.indexOf(variable);
-//        int otherVarIndex = other.variables.indexOf(variable);
-//
-//        // 4. Iterate through newCPT keys and perform multiplication and addition
-//        for (Map.Entry<List<String>, Double> entry : newCPT.getCpt().entrySet()) {
-//            List<String> newSample = entry.getKey();
-//
-//            // 5. Extract the corresponding values from this factor
-//            String varValueInNewCpt = newSample.get(varIndexInNewCpt);
-//            for (Map.Entry<List<String>, Double> thisEntry : this.getCpt().entrySet()){
-//                // check if the joined variable's value is equal in both factors
-//                List<String> thisSample = thisEntry.getKey();
-//                String thisVarValue = newSample.get(thisVarIndex);
-//                if(thisVarValue.equals(varValueInNewCpt)){
-//                    boolean isConsistent = true;
-//                    // for each variable in this factor
-//                    for(String currVar : this.variables){
-//                        // check if the value of the variable is consistent with the value in the new CPT
-//                        int currVarIndex = this.variables.indexOf(currVar);
-//                        String currVarValue = thisSample.get(currVarIndex);
-//                        String currValueInNewCpt = newSample.get(newCPT.getVariables().indexOf(currVar));
-//                        if(!newSample.get(currVarIndex).equals(currVarValue)){
-//                            isConsistent = false;
-//                            break;
-//                        }
-//                    }
-//
-//                }
-//            }
-//
-//            // 6. Extract the corresponding values from the other factor
-//
-//            // 7. Multiply the values
-//
-//
-//            // 8. Add the result to the value of the corresponding key in new CPT
-//
-//
-//            // Increment multiplication counter
-//            mulCounter.incrementAndGet();
-//        }
-//
-//        return new Factor(newCPT.getVariables(), newCPT.getCpt());
-//    }
-
-
     public Factor join(BayesianNetwork network, Factor other, String variable, AtomicInteger mulCounter) {
         // 1. Create new CPT
         CPT newCPT = new CPT();
@@ -196,22 +103,6 @@ public class Factor implements Comparable<Factor> {
             res = tmpCpt.get(entry.getKey());
         }
         return res;
-    }
-    private boolean consistent(List<String> assignment1, List<String> assignment2, String variable, Factor other) {
-        int index1 = this.variables.indexOf(variable);
-        int index2 = other.variables.indexOf(variable);
-        return assignment1.get(index1).equals(assignment2.get(index2));
-    }
-
-    private List<String> mergeAssignments(List<String> assignment1, List<String> assignment2, List<String> newVariables, Factor other) {
-        List<String> newAssignment = new ArrayList<>(Collections.nCopies(newVariables.size(), ""));
-        for (int i = 0; i < this.variables.size(); i++) {
-            newAssignment.set(newVariables.indexOf(this.variables.get(i)), assignment1.get(i));
-        }
-        for (int i = 0; i < other.getVariables().size(); i++) {
-            newAssignment.set(newVariables.indexOf(other.getVariables().get(i)), assignment2.get(i));
-        }
-        return newAssignment;
     }
 
     public void eliminate(String variable, AtomicInteger sumCounter) {
@@ -296,12 +187,7 @@ public class Factor implements Comparable<Factor> {
             variables.remove(variableIndex);
     }
 
-    /**
-     * restrictVariable removes entries from the CPT that do not match the assignment
-     * @param cpt
-     * @param variable
-     * @param assignment
-     */
+    //  restrictVariable removes entries from the CPT that do not match the assignment
     public void restrictVariable(Map<List<String>, Double> cpt, String variable, String assignment) {
         int variableIndex = variables.indexOf(variable);
         if (variableIndex == -1) {
@@ -319,36 +205,6 @@ public class Factor implements Comparable<Factor> {
         for (List<String> key : keysToRemove) {
             cpt.remove(key);
         }
-    }
-
-    public boolean checkIfExistResultFactor(String queryVariable, Map<String, String> evidenceVars, List<String> hiddenVars, AtomicInteger sumCounter) {
-        // Check if the Factor contains the query variable
-        if (!variables.contains(queryVariable)) {
-            return false;
-        }
-        // Check if the Factor contains the evidence variables
-        for (String evidenceVar : evidenceVars.keySet()) {
-            if (!variables.contains(evidenceVar)) {
-                return false;
-            }
-        }
-        // Check if the Factor contains the hidden variables
-        for (String hiddenVar : hiddenVars) {
-            if (!variables.contains(hiddenVar)) {
-                return false;
-            }
-        }
-        // Restrict evidence variables
-        for(Map.Entry<String, String> entry : evidenceVars.entrySet()) {
-            this.removeEvidenceVariable(entry.getKey(), entry.getValue());
-        }
-        // Eliminate hidden variables
-        for (String hiddenVar : hiddenVars) {
-            this.eliminate(hiddenVar, sumCounter);
-        }
-        this.normalize(sumCounter);
-
-        return true;
     }
 
     // this functions checks if the factor holds all the data needed to extract the result without any further operations
@@ -372,9 +228,6 @@ public class Factor implements Comparable<Factor> {
         }
         return true;
     }
-
-
-
 }
 
 

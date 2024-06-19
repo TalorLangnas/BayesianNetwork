@@ -19,22 +19,9 @@ public class BayesianNetwork {
         }
     }
 
-//    public void printNetwork() {
-
     public Map<String, NetNode> getNodes() {
         return nodes;
     }
-//        int i = 1;
-//        for (Map.Entry<String, BbNode> entry : nodes.entrySet()) {
-//            BbNode node = entry.getValue();
-//            System.out.println("" + i + ". Key: " + entry.getKey() + ",\n " +
-//                    "Outcomes: " + node.getOutcomes() + ",\n "
-//                    + "Parents: " + node.getParents() + ",\n "
-//                    + "Children: " + node.getChildren() + ",\n" + "\n" );
-////                    + "CPT: " + node.getCpt().toString() + "\n");
-//            i++;
-//        }
-//    }
 
     public void addNode(NetNode node) {
         nodes.put(node.getName(), node);

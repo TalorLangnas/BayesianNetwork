@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CPT {
         private List<String> variables;
@@ -96,7 +93,7 @@ public class CPT {
         // create a new Factor object with the sample space and the probabilities
         for (int i = 0; i < this.probabilities.size(); i++) {
             String outcomes = sampleSpace.get(i);
-            List<String> outcomesToList = List.of(outcomes.split(" "));
+            List<String> outcomesToList = Arrays.asList(outcomes.split(" "));
             cpt.put(outcomesToList, this.probabilities.get(i));
         }
         return cpt;
@@ -106,7 +103,7 @@ public class CPT {
         List<String> sampleSpace = SampleSpaceGenerator.getSampleSpace(this.outcomes);
         for (int i = 0; i < sampleSpace.size(); i++){
             String outcomes = sampleSpace.get(i);
-            List<String> outcomesToList = List.of(outcomes.split(" "));
+            List<String> outcomesToList = Arrays.asList(outcomes.split(" "));
             cpt.put(outcomesToList, 0.0);
         }
     }

@@ -23,19 +23,4 @@ public class SampleSpaceGenerator {
             generateCombinations(variables, index + 1, current + " " + outcome, sampleSpace);
         }
     }
-
-    public static void main(String[] args) {
-        // Example usage
-        List<List<String>> variables = new ArrayList<>();
-        variables.add(List.of("A1", "A2", "A3"));
-        variables.add(List.of("B1", "B2"));
-        variables.add(List.of("C1", "C2", "C3"));
-
-        List<String> sampleSpace = getSampleSpace(variables);
-
-        // Print the sample space
-        for (String sample : sampleSpace) {
-            System.out.println(sample);
-        }
-    }
 }
